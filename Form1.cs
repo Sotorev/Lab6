@@ -15,7 +15,6 @@ namespace Lab6
     {
         List<Client> clients = new List<Client>();
         List<Vehicle> vehicles = new List<Vehicle>();
-        List<Rental> rentals = new List<Rental>();
         public Form1()
         {
             InitializeComponent();
@@ -28,6 +27,22 @@ namespace Lab6
             LoadDataGridViews();
             
         }
+        private void SaveVehicles()
+        {
+            string file = "Vehiculos.txt";
+            FileStream fs = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
+            StreamWriter sw = new StreamWriter(fs);
+            foreach(Vehicle vehicle in vehicles)
+            {
+                sw.WriteLine(vehicle.Id);
+                sw.WriteLine(vehicle.Brand);
+                sw.WriteLine(vehicle.Model);
+                sw.WriteLine(vehicle.Color);
+                sw.WriteLine(vehicle.KMPrice);
+            }
+            sw.Close();
+            fs.Close();
+        }
         private void LoadDataGridViews()
         {
             dataGridView1.DataSource = null;
@@ -36,9 +51,6 @@ namespace Lab6
             dataGridView2.DataSource = null;
             dataGridView2.DataSource = vehicles;
             dataGridView2.Refresh();
-            dataGridView3.DataSource = null;
-            dataGridView3.DataSource = rentals;
-            dataGridView3.Refresh();
 
         }
         private void LoadClients(string file)
@@ -53,6 +65,8 @@ namespace Lab6
                 client.Adress = sr.ReadLine();
                 clients.Add(client);
             }
+            fs.Close ();
+            sr.Close ();
         }
         private void LoadVehicles(string file)
         {
@@ -63,44 +77,43 @@ namespace Lab6
                 Vehicle vehicle = new Vehicle();
                 vehicle.Id = sr.ReadLine();
                 vehicle.Brand = sr.ReadLine();
-                vehicle.Model = sr.ReadLine();
+                vehicle.Model = Convert.ToInt32(sr.ReadLine());
                 vehicle.Color = sr.ReadLine();
                 vehicle.KMPrice = (float)Convert.ToDouble(sr.ReadLine());
                 vehicles.Add(vehicle);
             }
+            fs.Close();
+            sr.Close();
         }
 
         private void inputButton_Click(object sender, EventArgs e)
         {
-            Vehicle vehicle = new Vehicle();
-            vehicle.Id = idTextBox.Text;
-            vehicle.Brand = brandTextBox.Text;
-            vehicle.Model = modelTextBox.Text;
-            vehicle.KMPrice =(float)Convert.ToDouble(KMPriceTextBox.Text);
-            vehicle.Color = colorTextBox.Text;
-            vehicles.Add(vehicle);
-            LoadDataGridViews();
+
+            if (vehicles.FindIndex(v => v.Id.Equals(idTextBox.Text)) == -1)
+            {
+                Vehicle vehicle = new Vehicle();
+                vehicle.Id = idTextBox.Text;
+                vehicle.Brand = brandTextBox.Text;
+                vehicle.Model = Convert.ToInt32(modelTextBox.Text);
+                vehicle.KMPrice = (float)Convert.ToDouble(KMPriceTextBox.Text);
+                vehicle.Color = colorTextBox.Text;
+                vehicles.Add(vehicle);
+                LoadDataGridViews();
+                SaveVehicles();
+            }
+            else
+            {
+                MessageBox.Show("El vehiculo esta repetido", "Error");
+            }
+
         }
 
-        private void rentalButton_Click(object sender, EventArgs e)
+        private void alquilarVehiculoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Rental rental = new Rental();
-            rental.StartDate = DateTime.Now;
-            rental.EndDate = dateTimePicker2.Value;
-            int nit = Convert.ToInt32(nitTextBox.Text);
-            var client = clients.Find(c => c.Nit == nit);
-            rental.Name = client.Name;
-            string id = rentalIdTextBox.Text;
-            var vehicle = vehicles.Find(v => v.Id.Equals(id));
-            rental.Brand = vehicle.Brand;
-            rental.Id = vehicle.Id;
-            rental.KMPrice = vehicle.KMPrice;
-            rental.Color = vehicle.Color;
-            rental.Model = vehicle.Model;
-            rental.KMTraveled = vehicle.KMPrice * Convert.ToInt32(  traveledTextBox.Text);
-            rentals.Add(rental);
-
-            LoadDataGridViews();
+            
+            Form2 form2 = new Form2();
+            form2.Show();
+            this.Visible = false;
         }
     }
 }
